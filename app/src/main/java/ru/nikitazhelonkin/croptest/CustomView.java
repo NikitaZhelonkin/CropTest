@@ -1,18 +1,20 @@
 package ru.nikitazhelonkin.croptest;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.os.Build;
+import android.graphics.Canvas;
+import android.graphics.Path;
+import android.graphics.Region;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
-import android.view.View;
 
 /**
  * Created by nikita on 24.08.17.
  */
 
 public class CustomView extends AppCompatImageView {
+
+    private Path mClipPath = new Path();
 
     public CustomView(Context context) {
         super(context);
@@ -27,12 +29,14 @@ public class CustomView extends AppCompatImageView {
     }
 
     @Override
-    public void setImageDrawable(@Nullable Drawable drawable) {
-        if (drawable == null || drawable instanceof CropDrawable) {
-            super.setImageDrawable(drawable);
-        } else {
-            super.setImageDrawable(new CropDrawable(drawable));
-        }
+    protected void onDraw(Canvas canvas) {
+        int radius = Math.min(getWidth(), getHeight()) / 4;
+        mClipPath.reset();
+        mClipPath.addCircle(getWidth() / 2, getHeight() / 2,
+                radius, Path.Direction.CW);
+        int clipSave = canvas.save();
+        canvas.clipPath(mClipPath, Region.Op.DIFFERENCE);
+        super.onDraw(canvas);
+        canvas.restoreToCount(clipSave);
     }
-
 }
